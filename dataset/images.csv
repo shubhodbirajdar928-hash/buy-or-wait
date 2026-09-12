@@ -1,0 +1,4 @@
+image_id,related_event_id,file_path,description
+IMG_001,EVT_005,media/images/img_utility_01.png,Electricity Utility Invoice Statement
+IMG_002,EVT_014,media/images/img_medical_02.png,City Health Diagnostic Invoice
+IMG_003,EVT_019,media/images/img_tax_03.png,Municipal Property Tax Surcharge Bill

@@ -1,0 +1,6 @@
+user_id,name,home_currency,current_balance,minimum_balance_to_keep,accepted_payment_methods,financial_priorities,willingness_to_reduce_flexible_spending
+USR_001,Alex Rivera,USD,3200.00,1500.00,"full_payment,partial_payment,installments","safety_first,essential_coverage",true
+USR_002,Priya Sharma,INR,98000.00,35000.00,"full_payment,partial_payment,installments","minimize_debt,avoid_fees",true
+USR_003,Marco Rossi,EUR,2200.00,1200.00,"full_payment,wait","maintain_liquidity,no_installments",false
+USR_004,Emma Watson,GBP,4500.00,1500.00,"full_payment,partial_payment","budget_strictness,save_buffer",true
+USR_005,David Kim,USD,1800.00,1000.00,"full_payment,partial_payment,installments",emergency_preparedness,false

@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Production build is committed or dist can be kept
+# Environment
+.env
+.DS_Store
+Thumbs.db

@@ -1,0 +1,26 @@
+event_id,user_id,event_date,event_type,description,amount,currency,status,is_essential,is_flexible,recurrence_interval,end_date,related_event_id
+EVT_001,USR_001,2026-09-15,recurring_income,Bi-weekly Salary Deposit,2400.00,USD,confirmed,false,false,biweekly,2026-12-31,
+EVT_002,USR_001,2026-09-29,recurring_income,Bi-weekly Salary Deposit,2400.00,USD,confirmed,false,false,biweekly,2026-12-31,
+EVT_003,USR_001,2026-10-01,recurring_expense,Apartment Rent Payment,1600.00,USD,confirmed,true,false,monthly,2026-12-31,
+EVT_004,USR_001,2026-10-05,recurring_expense,Auto Loan Installment,380.00,USD,confirmed,true,false,monthly,2026-12-31,
+EVT_005,USR_001,2026-09-20,essential_expense,Metro Electricity & Power Bill,,USD,confirmed,true,false,none,,IMG_001
+EVT_006,USR_001,2026-09-22,recurring_expense,Premium Streaming Bundle,45.00,USD,confirmed,false,true,monthly,2026-12-31,
+EVT_007,USR_001,2026-09-24,recurring_expense,Gym & Fitness Membership,85.00,USD,confirmed,false,true,monthly,2026-12-31,
+EVT_008,USR_001,2026-09-18,pending_credit,Expected Cashback Rebate,150.00,USD,pending,false,false,none,,
+EVT_009,USR_001,2026-09-19,cancelled_transaction,Cancelled Hotel Booking Refund,320.00,USD,cancelled,false,false,none,,
+EVT_010,USR_001,2026-09-13,failed_transaction,Failed Wire Transfer,500.00,USD,failed,false,false,none,,
+EVT_011,USR_002,2026-09-30,recurring_income,Monthly Tech Corp Salary,85000.00,INR,confirmed,false,false,monthly,2026-12-31,
+EVT_012,USR_002,2026-10-02,recurring_expense,Home Rental,32000.00,INR,confirmed,true,false,monthly,2026-12-31,
+EVT_013,USR_002,2026-10-07,recurring_expense,Parent Health Insurance Premium,12000.00,INR,confirmed,true,false,monthly,2026-12-31,
+EVT_014,USR_002,2026-09-25,essential_expense,City Diagnostic Medical Bill,,USD,confirmed,true,false,none,,IMG_002
+EVT_015,USR_002,2026-09-28,recurring_expense,Club & Hobby Subscriptions,4500.00,INR,confirmed,false,true,monthly,2026-12-31,
+EVT_016,USR_003,2026-09-25,confirmed_income,Quarterly Consulting Performance Bonus,2800.00,EUR,confirmed,false,false,none,,
+EVT_017,USR_003,2026-09-30,recurring_income,Regular Salary,3100.00,EUR,confirmed,false,false,monthly,2026-12-31,
+EVT_018,USR_003,2026-10-01,recurring_expense,Milano Flat Rental,1450.00,EUR,confirmed,true,false,monthly,2026-12-31,
+EVT_019,USR_003,2026-10-03,essential_expense,Quarterly Municipal Property Surcharge,,USD,confirmed,true,false,none,,IMG_003
+EVT_020,USR_004,2026-09-28,recurring_income,Monthly Salary,3600.00,GBP,confirmed,false,false,monthly,2026-12-31,
+EVT_021,USR_004,2026-10-01,recurring_expense,Mortgage Payment,1650.00,GBP,confirmed,true,false,monthly,2026-12-31,
+EVT_022,USR_004,2026-09-24,recurring_expense,Gourmet Coffee Club Delivery,65.00,GBP,confirmed,false,true,monthly,2026-12-31,
+EVT_023,USR_005,2026-09-20,recurring_income,Bi-weekly Paycheck,1100.00,USD,confirmed,false,false,biweekly,2026-12-31,
+EVT_024,USR_005,2026-10-01,recurring_expense,Studio Rent,1250.00,USD,confirmed,true,false,monthly,2026-12-31,
+EVT_025,USR_005,2026-10-04,essential_expense,Health Insurance Premium,220.00,USD,confirmed,true,false,monthly,2026-12-31,

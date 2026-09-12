@@ -1,0 +1,9 @@
+request_id,user_id,request_date,purchase_description,requested_amount,currency,desired_completion_date,request_type,allows_partial_payment
+REQ_001,USR_001,2026-09-12,Workstation Laptop M3,850.00,USD,2026-10-15,equipment,true
+REQ_002,USR_001,2026-09-12,Studio Camera & Production Rig,2200.00,USD,2026-10-15,equipment,true
+REQ_003,USR_002,2026-09-12,Executive Tech Leadership Course,60000.00,INR,2026-12-10,education,false
+REQ_004,USR_003,2026-09-12,Vehicle Transmission Repair,2500.00,EUR,2026-10-10,auto_repair,false
+REQ_005,USR_004,2026-09-12,Living Room Designer Furniture,1200.00,GBP,2026-10-25,home,true
+REQ_006,USR_005,2026-09-12,Luxury Gold Chronograph,5000.00,USD,2026-10-30,luxury,true
+REQ_007,USR_001,2026-09-12,Pro Audio Recording Interface,300.00,USD,2026-09-30,equipment,false
+REQ_008,USR_002,2026-09-12,Family Home Renovation Support,45000.00,INR,2026-09-20,family_support,true

@@ -1,0 +1,7 @@
+payment_option_id,request_id,option_type,first_payment_date,number_of_payments,days_between_payments,financing_fees,total_payable_amount,payment_amounts
+OPT_001,REQ_001,installments,2026-09-12,3,30,15.00,865.00,"288.33,288.33,288.34"
+OPT_002,REQ_002,installments,2026-09-15,4,15,60.00,2260.00,"565.00,565.00,565.00,565.00"
+OPT_003,REQ_003,installments,2026-09-12,3,30,0.00,60000.00,"20000.00,20000.00,20000.00"
+OPT_004,REQ_003,installments,2026-09-12,6,30,3000.00,63000.00,"10500.00,10500.00,10500.00,10500.00,10500.00,10500.00"
+OPT_005,REQ_005,installments,2026-09-15,3,30,20.00,1220.00,"406.66,406.67,406.67"
+OPT_006,REQ_006,installments,2026-09-12,12,30,250.00,5250.00,"437.50,437.50,437.50,437.50,437.50,437.50,437.50,437.50,437.50,437.50,437.50,437.50"
