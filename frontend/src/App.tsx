@@ -17,12 +17,13 @@ export function App() {
   const [activeEvaluation, setActiveEvaluation] = useState<EvaluationResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Initialize users on mount
+  // Initialize users on mount - Default to Priya Sharma (INR)
   useEffect(() => {
     fetchUsers().then(uList => {
       setUsers(uList);
       if (uList.length > 0) {
-        setSelectedUser(uList[0]);
+        const inrUser = uList.find(u => u.home_currency === 'INR') || uList[0];
+        setSelectedUser(inrUser);
       }
       setLoading(false);
     });

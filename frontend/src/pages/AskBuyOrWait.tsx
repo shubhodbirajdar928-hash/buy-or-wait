@@ -16,11 +16,17 @@ export const AskBuyOrWait: React.FC<AskBuyOrWaitProps> = ({
   const [naturalQuery, setNaturalQuery] = useState('');
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState<number | ''>('');
-  const [currency, setCurrency] = useState(selectedUser?.home_currency || 'USD');
+  const [currency, setCurrency] = useState(selectedUser?.home_currency || 'INR');
   const [completionDate, setCompletionDate] = useState('2026-10-31');
   const [requestType, setRequestType] = useState('one_time_purchase');
   const [allowsPartial, setAllowsPartial] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
+  React.useEffect(() => {
+    if (selectedUser) {
+      setCurrency(selectedUser.home_currency);
+    }
+  }, [selectedUser]);
 
   // Example prompt chips
   const examplePrompts = [
@@ -203,10 +209,10 @@ export const AskBuyOrWait: React.FC<AskBuyOrWaitProps> = ({
               onChange={(e) => setCurrency(e.target.value)}
               className="w-full px-3.5 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
             >
-              <option value="USD">USD - United States Dollar</option>
-              <option value="INR">INR - Indian Rupee</option>
-              <option value="EUR">EUR - Euro</option>
-              <option value="GBP">GBP - British Pound</option>
+              <option value="INR">INR - Indian Rupee (₹)</option>
+              <option value="USD">USD - United States Dollar ($)</option>
+              <option value="EUR">EUR - Euro (€)</option>
+              <option value="GBP">GBP - British Pound (£)</option>
             </select>
           </div>
 
