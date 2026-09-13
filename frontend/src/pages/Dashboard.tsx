@@ -1,8 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { 
-  Wallet, ShieldAlert, TrendingUp, Calendar, ArrowUpRight, 
-  CheckCircle2, Clock, XCircle, AlertTriangle, Sparkles, ChevronRight 
-} from 'lucide-react';
+﻿import React, { useEffect, useState } from 'react';
+import { Wallet, ShieldAlert, TrendingUp, Calendar, CheckCircle2, Clock, XCircle, AlertTriangle, Sparkles, ChevronRight, BarChart3, ArrowUpRight } from 'lucide-react';
 import { UserProfile, UserMetrics } from '../types';
 import { fetchUserDetail } from '../services/api';
 import { Disclaimer } from '../components/Disclaimer';
@@ -13,307 +10,194 @@ interface DashboardProps {
   onNavigateToAsk: () => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({
-  selectedUser,
-  onSelectRequest,
-  onNavigateToAsk
-}) => {
+const fmt = (n: number, dec = 2) => n.toLocaleString(undefined, { minimumFractionDigits: dec, maximumFractionDigits: dec });
+
+const statusConfig = {
+  affordable_now: { label: 'Affordable Now', color: '#10b981', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.25)', icon: CheckCircle2 },
+  affordable_with_plan: { label: 'Affordable w/ Plan', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.25)', icon: AlertTriangle },
+  affordable_later: { label: 'Affordable Later', color: '#f97316', bg: 'rgba(249,115,22,0.12)', border: 'rgba(249,115,22,0.25)', icon: Clock },
+  not_affordable: { label: 'Not Affordable', color: '#ef4444', bg: 'rgba(239,68,68,0.12)', border: 'rgba(239,68,68,0.25)', icon: XCircle },
+};
+
+export const Dashboard: React.FC<DashboardProps> = ({ selectedUser, onSelectRequest, onNavigateToAsk }) => {
   const [metrics, setMetrics] = useState<UserMetrics | null>(null);
   const [requests, setRequests] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (selectedUser) {
       setLoading(true);
-      fetchUserDetail(selectedUser.user_id)
-        .then(data => {
-          setMetrics(data.metrics);
-          setRequests(data.requests);
-        })
-        .finally(() => setLoading(false));
+      fetchUserDetail(selectedUser.user_id).then(d => { setMetrics(d.metrics); setRequests(d.requests); }).finally(() => setLoading(false));
     }
   }, [selectedUser]);
 
-  if (!selectedUser) {
-    return <div className="p-8 text-center text-slate-500">Please select a user to view dashboard.</div>;
-  }
+  if (!selectedUser) return (
+    <div className="flex items-center justify-center min-h-64 text-slate-500">Select a profile to view dashboard.</div>
+  );
 
   const curr = selectedUser.home_currency;
-  const currentBal = selectedUser.current_balance;
-  const minBal = selectedUser.minimum_balance_to_keep;
-  const bufferAmt = Math.max(0, currentBal - minBal);
-  const bufferPercent = Math.min(100, Math.round((bufferAmt / currentBal) * 100));
+  const bufferAmt = Math.max(0, selectedUser.current_balance - selectedUser.minimum_balance_to_keep);
+  const bufferPct = Math.min(100, Math.round((bufferAmt / selectedUser.current_balance) * 100));
 
-  // Determine safety indicator
-  let safetyStatus = 'Safe';
-  let safetyColor = 'bg-emerald-500 text-white';
-  let safetyBorder = 'border-emerald-200 bg-emerald-50';
-  let safetyDescription = 'Your baseline projected buffer comfortably protects your minimum reserve across 90 days.';
-
+  let safeLabel = 'Safe', safeColor = '#10b981', safeBg = 'rgba(16,185,129,0.08)', safeBorder = 'rgba(16,185,129,0.18)';
+  let safeDesc = 'Your projected cash buffer safely covers all essential expenses and your minimum reserve over 90 days.';
   if (metrics && !metrics.is_currently_safe) {
-    safetyStatus = 'Critical Breach';
-    safetyColor = 'bg-rose-600 text-white';
-    safetyBorder = 'border-rose-200 bg-rose-50';
-    safetyDescription = 'Baseline expenses exceed balance before next income. Minimum reserve breached.';
+    safeLabel = 'Critical Breach'; safeColor = '#ef4444'; safeBg = 'rgba(239,68,68,0.08)'; safeBorder = 'rgba(239,68,68,0.18)';
+    safeDesc = 'Baseline expenses exceed balance before next income. Minimum reserve breached.';
   } else if (metrics && metrics.min_buffer_90d < 500) {
-    safetyStatus = 'Safe with Caution';
-    safetyColor = 'bg-amber-500 text-white';
-    safetyBorder = 'border-amber-200 bg-amber-50';
-    safetyDescription = 'Reserves remain safe, but cash buffer drops near minimum threshold during peak bill dates.';
+    safeLabel = 'Caution'; safeColor = '#f59e0b'; safeBg = 'rgba(245,158,11,0.08)'; safeBorder = 'rgba(245,158,11,0.18)';
+    safeDesc = 'Reserves remain safe, but cash buffer drops near minimum threshold during peak bill dates.';
   }
+
+  const metricCards = [
+    { label: 'Available Balance', value: `${curr} ${fmt(selectedUser.current_balance)}`, sub: `${bufferPct}% uncommitted buffer`, icon: Wallet, color: '#0ea5e9' },
+    { label: 'Minimum Reserve', value: `${curr} ${fmt(selectedUser.minimum_balance_to_keep)}`, sub: 'Guaranteed floor', icon: ShieldAlert, color: '#8b5cf6' },
+    { label: 'Confirmed 30d Income', value: `+${curr} ${metrics ? fmt(metrics.upcoming_income_30d) : '—'}`, sub: 'Verified payroll streams', icon: TrendingUp, color: '#10b981', positive: true },
+    { label: 'Essential Commitments', value: `-${curr} ${metrics ? fmt(metrics.upcoming_essential_30d) : '—'}`, sub: 'Rent, utilities, medical', icon: Calendar, color: '#ef4444' },
+  ];
 
   return (
     <div className="space-y-6">
-      {/* Top Banner */}
-      <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <div className="text-xs uppercase tracking-wider text-emerald-400 font-semibold mb-1">
-            Personal Affordability Hub
+      {/* Hero Banner */}
+      <div className="relative overflow-hidden rounded-2xl p-6 sm:p-8" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(14,165,233,0.08) 50%, rgba(99,102,241,0.08) 100%)', border: '1px solid rgba(16,185,129,0.18)' }}>
+        <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, rgba(16,185,129,0.15) 0%, transparent 50%)' }} />
+        <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <div className="text-xs font-semibold text-emerald-400 uppercase tracking-widest mb-1">Personal Affordability Hub</div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              Welcome back, <span className="gradient-text-green">{selectedUser.name}</span>
+            </h1>
+            <p className="text-slate-400 text-sm mt-2 max-w-lg">
+              Simulating your liquidity across a strict <span className="text-slate-300 font-semibold">90-day horizon</span> to ensure every purchase decision is backed by verified cash flow.
+            </p>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">Welcome back, {selectedUser.name}</h1>
-          <p className="text-slate-300 text-sm mt-1 max-w-xl">
-            Simulating liquidity over a strict 90-day horizon to ensure your purchase decisions never breach your safety reserves.
-          </p>
+          <button onClick={onNavigateToAsk} className="btn-primary flex-shrink-0">
+            <Sparkles className="w-4 h-4" /> Ask Buy or Wait
+          </button>
         </div>
-        <button
-          onClick={onNavigateToAsk}
-          className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold px-4 py-2.5 rounded-xl shadow-md transition-all hover:scale-105"
-        >
-          <Sparkles className="w-4 h-4" />
-          Test a New Purchase
-        </button>
       </div>
 
-      {/* Metrics Row */}
+      {/* Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Available Balance */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Available Balance</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">
-                {curr} {currentBal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-              </h3>
+        {metricCards.map((card, i) => (
+          <div key={i} className="glass rounded-2xl p-5 transition-all hover:scale-[1.01]">
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{card.label}</p>
+                <div className={`text-xl font-extrabold mt-1.5 font-mono tracking-tight ${card.positive ? 'text-emerald-400' : 'text-slate-100'}`}>{loading && i > 1 ? '...' : card.value}</div>
+              </div>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ml-3" style={{ background: `${card.color}18`, border: `1px solid ${card.color}30` }}>
+                <card.icon className="w-4.5 h-4.5" style={{ color: card.color, width: '18px', height: '18px' }} />
+              </div>
             </div>
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-              <Wallet className="w-5 h-5" />
-            </div>
+            <p className="text-[11px] text-slate-600 mt-3">{card.sub}</p>
           </div>
-          <div className="mt-3 text-xs text-slate-500 flex items-center gap-1.5">
-            <span className="font-semibold text-emerald-600 font-mono">{bufferPercent}%</span> uncommitted discretionary buffer
+        ))}
+      </div>
+
+      {/* Safety + Preferences row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Safety card */}
+        <div className="lg:col-span-2 rounded-2xl p-6" style={{ background: safeBg, border: `1px solid ${safeBorder}` }}>
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Financial Safety Status</span>
+            <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: `${safeColor}20`, color: safeColor, border: `1px solid ${safeColor}40` }}>{safeLabel}</span>
+          </div>
+          <div className="text-slate-100 font-bold text-lg">
+            90-Day Liquidity Buffer: <span className="font-mono" style={{ color: safeColor }}>{curr} {metrics ? fmt(metrics.min_buffer_90d) : '...'}</span>
+          </div>
+          <p className="text-slate-400 text-sm mt-2">{safeDesc}</p>
+          <div className="mt-5 pt-4 grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+            <div>
+              <div className="text-slate-500">Lowest 90d Point</div>
+              <div className="font-mono font-semibold text-slate-200 mt-0.5">{curr} {metrics ? metrics.lowest_projected_balance.toLocaleString() : '...'}</div>
+            </div>
+            <div>
+              <div className="text-slate-500">Flexible Spending</div>
+              <div className="font-semibold text-slate-200 mt-0.5">{selectedUser.willingness_to_reduce_flexible_spending ? 'Adjustable ✓' : 'Fixed Only'}</div>
+            </div>
+            <div>
+              <div className="text-slate-500">Accepted Methods</div>
+              <div className="font-semibold text-slate-200 mt-0.5 truncate">{selectedUser.accepted_payment_methods.join(', ').replace(/_/g, ' ')}</div>
+            </div>
           </div>
         </div>
 
-        {/* Required Reserve */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div className="flex justify-between items-start">
+        {/* Profile card */}
+        <div className="glass rounded-2xl p-6">
+          <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Risk Profile</div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl font-bold" style={{ background: 'linear-gradient(135deg,#10b981,#0284c7)', color: '#fff' }}>
+              {selectedUser.name.charAt(0)}
+            </div>
             <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Minimum Reserve</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">
-                {curr} {minBal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-              </h3>
-            </div>
-            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-              <ShieldAlert className="w-5 h-5" />
+              <div className="font-bold text-slate-100">{selectedUser.name}</div>
+              <div className="text-xs text-slate-500 font-mono">{selectedUser.home_currency} · {selectedUser.user_id}</div>
             </div>
           </div>
-          <div className="mt-3 text-xs text-slate-500">
-            Guaranteed baseline threshold
+          <div className="space-y-2.5 text-xs">
+            {[
+              { k: 'Priority', v: selectedUser.financial_priorities.replace(/_/g, ' ').replace(/,/g, ', ') },
+              { k: 'Reserve Ratio', v: `${Math.round((selectedUser.minimum_balance_to_keep / selectedUser.current_balance) * 100)}% of balance` },
+              { k: 'Currency', v: selectedUser.home_currency },
+            ].map(({ k, v }) => (
+              <div key={k} className="flex justify-between items-center py-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <span className="text-slate-500">{k}</span>
+                <span className="font-semibold text-slate-300 text-right max-w-[60%] truncate">{v}</span>
+              </div>
+            ))}
           </div>
-        </div>
-
-        {/* Upcoming 30d Income */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Confirmed 30d Income</p>
-              <h3 className="text-2xl font-bold text-emerald-600 mt-1">
-                +{curr} {metrics ? metrics.upcoming_income_30d.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '...'}
-              </h3>
-            </div>
-            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
-              <TrendingUp className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="mt-3 text-xs text-slate-500">
-            Verified payroll and bonus streams
-          </div>
-        </div>
-
-        {/* Upcoming 30d Commitments */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Essential Commitments</p>
-              <h3 className="text-2xl font-bold text-slate-800 mt-1">
-                -{curr} {metrics ? metrics.upcoming_essential_30d.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '...'}
-              </h3>
-            </div>
-            <div className="p-2 bg-rose-50 text-rose-600 rounded-lg">
-              <Calendar className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="mt-3 text-xs text-slate-500">
-            Rent, utilities, medical obligations
-          </div>
+          <div className="mt-4 text-[11px] text-slate-600">Rules strictly enforced by deterministic engine.</div>
         </div>
       </div>
 
-      {/* Safety Indicator & User Preferences Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Safety Indicator Card */}
-        <div className={`p-6 rounded-2xl border ${safetyBorder} shadow-sm lg:col-span-2 flex flex-col justify-between`}>
+      {/* Requests Table */}
+      <div className="glass rounded-2xl overflow-hidden">
+        <div className="flex justify-between items-center px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Financial Safety Status
-              </span>
-              <span className={`text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider ${safetyColor}`}>
-                {safetyStatus}
-              </span>
-            </div>
-            <h4 className="text-lg font-bold text-slate-900 mt-2">
-              90-Day Liquidity Buffer: {curr} {metrics ? metrics.min_buffer_90d.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '0.00'}
-            </h4>
-            <p className="text-sm text-slate-600 mt-1">{safetyDescription}</p>
+            <h3 className="font-bold text-slate-100">Recent Affordability Decisions</h3>
+            <p className="text-xs text-slate-500 mt-0.5">AI-evaluated via 90-day deterministic cash flow simulation</p>
           </div>
-
-          <div className="mt-6 pt-4 border-t border-slate-200/60 grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
-            <div>
-              <span className="text-slate-500">Lowest 90d Point:</span>
-              <p className="font-semibold text-slate-900 font-mono mt-0.5">
-                {curr} {metrics ? metrics.lowest_projected_balance.toLocaleString() : '...'}
-              </p>
-            </div>
-            <div>
-              <span className="text-slate-500">Flexible Spending:</span>
-              <p className="font-semibold text-slate-900 capitalize mt-0.5">
-                {selectedUser.willingness_to_reduce_flexible_spending ? 'Adjustable' : 'Fixed Only'}
-              </p>
-            </div>
-            <div>
-              <span className="text-slate-500">Accepted Methods:</span>
-              <p className="font-semibold text-slate-900 capitalize mt-0.5 truncate">
-                {selectedUser.accepted_payment_methods.join(', ').replace(/_/g, ' ')}
-              </p>
-            </div>
-          </div>
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.06)', color: '#64748b' }}>{requests.length} Requests</span>
         </div>
 
-        {/* User Priorities Card */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-          <div>
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Profile Preferences</span>
-            <h4 className="text-base font-bold text-slate-900 mt-1">Configured Risk Rules</h4>
-            <ul className="mt-3 space-y-2 text-xs text-slate-600">
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span>Home Currency: <strong>{selectedUser.home_currency}</strong></span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span>Priority: <strong>{selectedUser.financial_priorities.replace(/_/g, ' ')}</strong></span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span>Min Reserve Ratio: <strong>{Math.round((minBal / currentBal) * 100)}% of balance</strong></span>
-              </li>
-            </ul>
-          </div>
-          <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400">
-            Rules strictly enforced by deterministic calculation engine.
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Decisions Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-slate-200 flex justify-between items-center">
-          <div>
-            <h3 className="font-bold text-slate-900 text-base">Recent Affordability Decisions</h3>
-            <p className="text-xs text-slate-500 mt-0.5">Automated evaluations based on strict 90-day cash flow simulation</p>
-          </div>
-          <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">
-            {requests.length} Requests
-          </span>
-        </div>
-
-        {requests.length === 0 ? (
-          <div className="p-8 text-center text-sm text-slate-500">
-            No requests registered for this user yet. Click "Test a New Purchase" above.
-          </div>
+        {loading ? (
+          <div className="p-8 space-y-3">{[1,2].map(i => <div key={i} className="shimmer h-12 rounded-xl" />)}</div>
+        ) : requests.length === 0 ? (
+          <div className="p-12 text-center text-slate-500 text-sm">No requests yet. Click <span className="text-emerald-400">"Ask Buy or Wait"</span> to test a purchase.</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-600 text-xs font-semibold border-b border-slate-200">
+          <div className="overflow-x-auto custom-scrollbar">
+            <table className="w-full text-left dark-table">
+              <thead>
                 <tr>
-                  <th className="px-5 py-3">Purchase Request</th>
-                  <th className="px-4 py-3">Amount</th>
-                  <th className="px-4 py-3">Safe Today</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Recommended Method</th>
-                  <th className="px-4 py-3">Deadline</th>
-                  <th className="px-4 py-3 text-right">Action</th>
+                  <th>Purchase Request</th><th>Amount</th><th>Safe to Pay</th><th>Status</th><th>Method</th><th>Deadline</th><th className="text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
                 {requests.map((req) => {
-                  let badge = {
-                    bg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                    icon: <CheckCircle2 className="w-3.5 h-3.5" />,
-                    label: 'Affordable Now'
-                  };
-                  if (req.affordability_status === 'affordable_with_plan') {
-                    badge = {
-                      bg: 'bg-amber-50 text-amber-700 border-amber-200',
-                      icon: <AlertTriangle className="w-3.5 h-3.5" />,
-                      label: 'Affordable with Plan'
-                    };
-                  } else if (req.affordability_status === 'affordable_later') {
-                    badge = {
-                      bg: 'bg-orange-50 text-orange-700 border-orange-200',
-                      icon: <Clock className="w-3.5 h-3.5" />,
-                      label: 'Affordable Later'
-                    };
-                  } else if (req.affordability_status === 'not_affordable') {
-                    badge = {
-                      bg: 'bg-rose-50 text-rose-700 border-rose-200',
-                      icon: <XCircle className="w-3.5 h-3.5" />,
-                      label: 'Not Recommended'
-                    };
-                  }
-
+                  const cfg = statusConfig[req.affordability_status as keyof typeof statusConfig] || statusConfig.not_affordable;
+                  const StatusIcon = cfg.icon;
                   return (
-                    <tr key={req.request_id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="px-5 py-3.5">
-                        <div className="font-semibold text-slate-900">{req.purchase_description}</div>
-                        <div className="text-[11px] text-slate-400 font-mono">{req.request_id}</div>
+                    <tr key={req.request_id} style={{ cursor: 'pointer' }} onClick={() => onSelectRequest(req.request_id)}>
+                      <td>
+                        <div className="font-semibold text-slate-200">{req.purchase_description}</div>
+                        <div className="text-[11px] text-slate-600 font-mono">{req.request_id}</div>
                       </td>
-                      <td className="px-4 py-3.5 font-semibold text-slate-900">
-                        {curr} {req.requested_amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className="px-4 py-3.5 font-mono text-slate-700 text-xs">
-                        {curr} {req.amount_safe_to_pay.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border font-medium ${badge.bg}`}>
-                          {badge.icon}
-                          {badge.label}
+                      <td className="font-mono font-semibold text-slate-200">{curr} {fmt(req.requested_amount)}</td>
+                      <td className="font-mono text-emerald-400">{curr} {fmt(req.amount_safe_to_pay)}</td>
+                      <td>
+                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
+                          style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}>
+                          <StatusIcon className="w-3 h-3" />{cfg.label}
                         </span>
                       </td>
-                      <td className="px-4 py-3.5 capitalize text-xs text-slate-700 font-medium">
-                        {req.recommended_payment_method.replace(/_/g, ' ')}
-                      </td>
-                      <td className="px-4 py-3.5 text-xs text-slate-500">
-                        {req.desired_completion_date}
-                      </td>
-                      <td className="px-4 py-3.5 text-right">
-                        <button
-                          onClick={() => onSelectRequest(req.request_id)}
-                          className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1"
-                        >
-                          View Analysis
-                          <ChevronRight className="w-3.5 h-3.5" />
+                      <td className="text-slate-400 capitalize text-xs">{req.recommended_payment_method?.replace(/_/g, ' ')}</td>
+                      <td className="text-slate-500 text-xs font-mono">{req.desired_completion_date}</td>
+                      <td className="text-right">
+                        <button onClick={e => { e.stopPropagation(); onSelectRequest(req.request_id); }}
+                          className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
+                          style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981', border: '1px solid rgba(16,185,129,0.2)' }}>
+                          View <ChevronRight className="w-3.5 h-3.5" />
                         </button>
                       </td>
                     </tr>
@@ -325,7 +209,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
         )}
       </div>
 
-      {/* Mandatory Disclaimer */}
       <Disclaimer />
     </div>
   );

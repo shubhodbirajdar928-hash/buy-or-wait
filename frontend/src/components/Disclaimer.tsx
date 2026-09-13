@@ -1,13 +1,12 @@
-import React from 'react';
-import { AlertCircle } from 'lucide-react';
+﻿import React from 'react';
+import { AlertTriangle } from 'lucide-react';
 
-export const Disclaimer: React.FC = () => {
-  return (
-    <div className="bg-slate-100 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 flex items-start gap-2 shadow-sm my-4">
-      <AlertCircle className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
-      <div>
-        <span className="font-semibold text-slate-700">Financial Decision-Support Notice:</span> Buy or Wait is an AI-powered personal financial simulation and decision-support prototype. It does not constitute certified financial, tax, or investment advice. Projections are computed strictly from supplied historical records, confirmed schedules, and deterministic safety rules.
-      </div>
-    </div>
-  );
-};
+export const Disclaimer: React.FC = () => (
+  <div className="flex items-start gap-3 px-4 py-3.5 rounded-xl text-xs text-slate-500" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+    <AlertTriangle className="w-4 h-4 text-amber-500/70 flex-shrink-0 mt-0.5" />
+    <span>
+      <span className="font-semibold text-slate-400">Financial Decision-Support Notice: </span>
+      Buy or Wait is an AI-powered personal financial simulation prototype. It does not constitute certified financial, tax, or investment advice. All projections are computed strictly from supplied historical records, confirmed schedules, and deterministic safety rules.
+    </span>
+  </div>
+);
